@@ -38,7 +38,7 @@ def read_csv_files_by_columns(argument):
 
 
 
-def read_columns_in_parallel(data_path, columns):
+def read_columns_in_parallel(data_path, columns, data_read_function):
 
     if len(columns) == 0:
         raise ValueError('columns are empty...')
@@ -50,7 +50,7 @@ def read_columns_in_parallel(data_path, columns):
 
     start_time = time.time()
     pool = multiprocessing.Pool(multiprocessing.cpu_count())
-    results = pool.map(read_csv_files_by_columns, zip(data_files, columns_list, path_list))
+    results = pool.map(data_read_function, zip(data_files, columns_list, path_list))
     print 'loading all the files using {} seconds'.format(round((time.time() - start_time), 2))
 
     combined_data = pd.concat(results, axis=0)
