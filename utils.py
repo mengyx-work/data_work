@@ -31,6 +31,29 @@ def split_large_csv_file(file_path, data_file):
             row_counter += 1
 
 
+
+def read_columns_in_parallel(data_path, columns): 
+
+    if len(columns) == 0:
+        raise ValueError('columns are empty...')
+        
+    data_files = listdir(data_path)
+    data_files = [f for f in data_files if '.csv' in f]
+
+    def read_csv_files_by_columns(data_file, columns):
+        data = pd.read_csv(join(data_path, data_file), usecols=columns)
+        return data
+
+    start_time = time.time()
+    pool = multiprocessing.Pool(multiprocessing.cpu_count())
+    results = pool.map(read_csv_files_by_columns, data_files, [columns for f in data_files])
+    print 'loading all the files using {} seconds'.format(round((time.time() - start_time), 2))
+
+    combined_data = pd.concat(results, axis=0)
+    return combined_data
+ 
+
+
 class load_data(object):
 
     def __init__(self, file_path, data_format='.csv', columns=None):
@@ -48,9 +71,9 @@ class load_data(object):
         if columns is not None:
             self._check_data_columns(columns)
 
-
-    def _read_csv_file_by_columns(self, data_file, columns):
-        data = pd.read_csv(join(self.file_path, data_file), usecols=columns)
+    @classmethod
+    def _read_csv_file_by_columns(self, data_file):
+        data = pd.read_csv(join(self.file_path, data_file), usecols=self.columns)
         return data
 
 
@@ -75,20 +98,4 @@ class load_data(object):
             if self.columns != columns:
                 raise ValueError('different columns are found from file {}'.format(data_file))
 
-
-    def read_columns_in_parallel(self, columns, data_file=None): 
-        
-        if len(columns) == 0:
-            raise ValueError('columns are empty...')
-
-        if data_file is not None:
-            return self._read_csv_file_by_columns(data_file, columns)
-
-        start_time = time.time()
-        pool = multiprocessing.Pool(multiprocessing.cpu_count())
-        results = pool.map(self._read_csv_file_by_columns, self.data_files)
-        print 'loading all the files using {} seconds'.format(round((time.time() - start_time), 2))
-
-        combined_data = self._combine_dataFrames(results)
-        return combined_data
-            
+           
