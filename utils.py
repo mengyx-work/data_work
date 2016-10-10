@@ -5,6 +5,27 @@ from os import listdir
 import pandas as pd
 import numpy as np
 
+
+def split_large_csv_file(file_path, data_file):
+    file_counter = 0
+    row_counter = 0
+    file_row_limit = 50000
+    output_file = None
+
+    with open(join(file_path, data_file)) as f:
+        header = f.readline()
+        for line in f:
+            if row_counter % file_row_limit == 0:
+                if output_file is not None:
+                    output_file.close()
+                output_file_name = '{}_split_{}'.format(data_file, file_counter)
+                output_file = open(output_file_name, 'w')
+                output_file.write(header)
+
+            output_file.write(line)
+            row_counter += 1
+
+
 class load_data(object):
 
     def __init__(self, file_path, data_format='.csv', columns=None):
@@ -19,7 +40,8 @@ class load_data(object):
         if len(self.data_files) == 0:
             raise ValueError('failed to find any data file in format {} from {}'.format(data_format, file_path)) 
 
-        self._check_data_columns(columns)
+        if columns is not None:
+            self._check_data_columns(columns)
 
 
     def _read_csv_file_by_columns(self, data_file, columns):
