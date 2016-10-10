@@ -11,17 +11,22 @@ def split_large_csv_file(file_path, data_file):
     row_counter = 0
     file_row_limit = 50000
     output_file = None
+    start_time = time.time()
 
     with open(join(file_path, data_file)) as f:
         header = f.readline()
         for line in f:
+
             if row_counter % file_row_limit == 0:
                 if output_file is not None:
                     output_file.close()
-                output_file_name = '{}_split_{}'.format(data_file, file_counter)
+                file_name = data_file.split('.')[0]
+                file_format = data_file.split('.')[1]
+                output_file_name = '{}_split_{}.{}'.format(file_name, file_counter, file_format)
+                file_counter += 1
                 output_file = open(output_file_name, 'w')
                 output_file.write(header)
-
+                print '{} lines had been processed using {} seconds.'.format(row_counter, round((time.time() - start_time), 0))
             output_file.write(line)
             row_counter += 1
 
