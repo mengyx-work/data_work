@@ -31,27 +31,31 @@ def split_large_csv_file(file_path, data_file):
             row_counter += 1
 
 
+def read_csv_files_by_columns(argument):
+    data_file, columns, file_path = argument
+    data = pd.read_csv(join(file_path, data_file), usecols=columns)
+    return data
 
-def read_columns_in_parallel(data_path, columns): 
+
+
+def read_columns_in_parallel(data_path, columns):
 
     if len(columns) == 0:
         raise ValueError('columns are empty...')
-        
-    data_files = listdir(data_path)
-    data_files = [f for f in data_files if '.csv' in f]
 
-    def read_csv_files_by_columns(data_file, columns):
-        data = pd.read_csv(join(data_path, data_file), usecols=columns)
-        return data
+    data_files   = listdir(data_path)
+    data_files   = [f for f in data_files if '.csv' in f]
+    columns_list = [columns for f in data_files]
+    path_list    = [data_path for f in data_files]
 
     start_time = time.time()
     pool = multiprocessing.Pool(multiprocessing.cpu_count())
-    results = pool.map(read_csv_files_by_columns, data_files, [columns for f in data_files])
+    results = pool.map(read_csv_files_by_columns, zip(data_files, columns_list, path_list))
     print 'loading all the files using {} seconds'.format(round((time.time() - start_time), 2))
 
     combined_data = pd.concat(results, axis=0)
     return combined_data
- 
+
 
 
 class load_data(object):
