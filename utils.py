@@ -7,7 +7,7 @@ import numpy as np
 
 class load_data(object):
 
-    def __init__(self, file_path, data_format='.csv'):
+    def __init__(self, file_path, data_format='.csv', columns=None):
 
         if not isdir(file_path):
             raise ValueError('the file path {} does not exists!'.format(file_path))
@@ -19,9 +19,11 @@ class load_data(object):
         if len(self.data_files) == 0:
             raise ValueError('failed to find any data file in format {} from {}'.format(data_format, file_path)) 
 
+        self._check_data_columns(columns)
+
 
     def _read_csv_file_by_columns(self, data_file, columns):
-        data = pd.read_csv(join(file_path, data_file), usecols=columns)
+        data = pd.read_csv(join(self.file_path, data_file), usecols=columns)
         return data
 
 
@@ -30,7 +32,25 @@ class load_data(object):
         return combined_data
 
 
-    def read_columns_in_parallel(self, data_file = None, columns): 
+    def _check_data_columns(self, columns=None):
+
+        if columns is not None:
+            self.columns = columns
+        else:
+            self.columns = None
+
+        for csv_file in self.data_files:
+            columns = pd.read_csv(join(self.file_path, csv_file), nrow=0)
+
+            if self.columns is None:
+                self.columns = columns
+
+            if self.columns != columns:
+                raise ValueError('different columns are found from file {}'.format(data_file))
+
+
+    def read_columns_in_parallel(self, columns, data_file=None): 
+        
         if len(columns) == 0:
             raise ValueError('columns are empty...')
 
