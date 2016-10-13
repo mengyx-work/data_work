@@ -16,7 +16,6 @@ def split_large_csv_file(file_path, data_file):
     with open(join(file_path, data_file)) as f:
         header = f.readline()
         for line in f:
-
             if row_counter % file_row_limit == 0:
                 if output_file is not None:
                     output_file.close()
@@ -29,6 +28,9 @@ def split_large_csv_file(file_path, data_file):
                 print '{} lines had been processed using {} seconds.'.format(row_counter, round((time.time() - start_time), 0))
             output_file.write(line)
             row_counter += 1
+
+        print 'total {} lines had been processed using {} seconds.'.format(row_counter, round((time.time() - start_time), 0))
+        output_file.close()
 
 
 def read_csv_files_by_columns(argument):
