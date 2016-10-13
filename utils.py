@@ -6,10 +6,9 @@ import pandas as pd
 import numpy as np
 
 
-def split_large_csv_file(file_path, data_file):
+def split_large_csv_file(file_path, data_file, file_row_limit=50000):
     file_counter = 0
     row_counter = 0
-    file_row_limit = 50000
     output_file = None
     start_time = time.time()
 
