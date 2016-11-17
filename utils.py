@@ -53,6 +53,8 @@ def read_columns_in_parallel(data_path, columns, data_read_function):
     pool = multiprocessing.Pool(multiprocessing.cpu_count())
     results = pool.map(data_read_function, zip(data_files, columns_list, path_list))
     print 'loading all the files using {} seconds'.format(round((time.time() - start_time), 2))
+    pool.close() 
+    pool.join() 
 
     combined_data = pd.concat(results, axis=0)
     return combined_data
